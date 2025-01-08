@@ -1,2 +1,3 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+/u01/home/pbeati/.local/share/R/cladeAcc/*$
