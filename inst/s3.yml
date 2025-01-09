@@ -1,4 +1,4 @@
 default:
     aws_access_key_id: 'hola'
     aws_secret_access_key: 'paula'
-    ypdate: FALSE
+    update: FALSE
