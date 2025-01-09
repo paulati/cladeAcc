@@ -14,6 +14,17 @@ load_config <- function() {
     return(config)
 }
 
+load_aws_config <- function() {
+
+    config_file_path <- system.file('s3.yml', package = 'cladeAcc',
+                                    mustWork = FALSE)
+    config_default <- config::get(file = config_file_path, use_parent = FALSE,
+                                  config = 'default')
+
+    return(config_default)
+}
+
+
 # https://rstudio.github.io/config/articles/introduction.html
 # https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
 

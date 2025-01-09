@@ -37,13 +37,13 @@ download_data <- function(url,
                           force_download = FALSE) {
 
     tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
-    dir.create(tmp_base_dir, recursive = TRUE, showWarnings = TRUE)
+    dir.create(tmp_base_dir, recursive = TRUE, showWarnings = FALSE)
 
     if(nchar(tmp_storage_relative_path) == 0) {
         data_base_dir <- tmp_base_dir
     } else {
         data_base_dir <- file.path(tmp_base_dir, tmp_storage_relative_path)
-        dir.create(data_base_dir, recursive = TRUE, showWarnings = TRUE)
+        dir.create(data_base_dir, recursive = TRUE, showWarnings = FALSE)
     }
 
     setwd(data_base_dir)

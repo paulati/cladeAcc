@@ -1,0 +1,54 @@
+default:
+    env: server
+
+# this is env value, possible values {local_pc, server, aws, ...}
+local_pc:
+# TODO
+
+server:
+    data_preparation:
+        alignments:
+            - 100_way
+            - 77_way
+        source:
+            100_way:
+                base_url: https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/maf
+                file_name_pattern:  "chr{chr}.maf.gz"
+                md5_file_name: md5sum.txt
+                chrs: !expr seq(1, 22)
+            77_way:
+                base_url: https://hgdownload.soe.ucsc.edu/goldenPath/galGal6/multiz77way/maf
+                file_name_pattern:  "chr{chr}.maf.gz"
+                md5_file_name: md5sum.txt
+                chrs: !expr seq(1, 33)
+        storage:
+            local:
+                base_path: /u03/pbeati/2024/lucia/acc_regions_mammals_aves
+            aws:
+                base_url:
+    conservation:
+        filtering:
+            100_way:
+                fruits: ['Apple', 'Orange', 'Strawberry', 'Mango']
+            77_way:
+
+
+
+
+# https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+# https://spacelift.io/blog/yaml
+
+# vars:
+#    service1:
+#        config: &service_config
+#            env: prod
+#            retries: 3
+#            version: 4.8
+#    service2:
+#        config:
+#            <<: *service_config
+#            version: 5
+#    service3:
+#        config:
+#            <<: *service_config
+#            version: 4.2
