@@ -2,4 +2,4 @@
 .Rhistory
 .RData
 .Ruserdata
-./inst/s3.yml
+/inst/s3.yml
