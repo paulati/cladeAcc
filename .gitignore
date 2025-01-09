@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 ./inst/s3.yml
+cladeAcc.BiocCheck
