@@ -1,0 +1,118 @@
+---
+title: "Data Preparation"
+output: html_document
+date: "2025-01-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Preparation
+
+## Mammals
+
+```
+alignment_id_mammals <- '100_way'
+chr_mammals <- 22
+local_storage <- TRUE
+aws_storage <- FALSE
+
+# prepare_alignment_file(alignment_id_mammals, chr_mammals, local_storage = local_storage, aws_storage = aws_storage)
+
+# prepare_neutral_model_file(alignment_id_mammals, local_storage = local_storage, aws_storage = aws_storage)
+
+```
+
+## Aves
+
+```
+
+alignment_id_aves <- '77_way'
+chr_aves <- 24
+local_storage <- TRUE
+aws_storage <- FALSE
+
+# prepare_alignment_file(alignment_id_aves, chr_aves, local_storage = local_storage, aws_storage = aws_storage)
+
+# prepare_neutral_model_file(alignment_id_aves, local_storage = local_storage, aws_storage = aws_storage)
+
+```
+
+# Conservation
+
+## Mammals
+
+```
+my_custom_req_feats <- function(alignment) {
+    print(alignment)
+    return('hola')
+}
+
+clade_1 <- 'mammals'
+chrs <- c(chr_mammals)
+result_100_mammals <- conserved_elements_computation(alignment_id_mammals, clade_1, chrs,
+                required_feats_func = required_species_features_mammals_100way)
+
+print(result_100_mammals)
+
+clade_2 <- 'sarcopterygii'
+chrs <- c(chr_mammals)
+result_100_sarc <- conserved_elements_computation(alignment_id_mammals, clade_2, chrs,
+                required_feats_func = required_species_features_sarcopterygii_100way)
+
+print(result_100_sarc)
+
+conserved_elements_in_common(result_100_mammals, result_100_sarc,
+                                         alignment_id_mammals,
+                                         clade_1, clade_2, chr_mammals)
+
+
+
+```
+
+
+# Aves
+
+```
+clade_1 <- 'aves'
+chrs <- c(chr_aves)
+result_77_aves <- conserved_elements_computation(alignment_id_aves, clade_1, chrs,
+                required_feats_func = required_species_features_aves_77way)
+
+print(result_77_aves)
+
+clade_2 <- 'sarcopterygii'
+chrs <- c(chr_aves)
+result_77_sarc <- conserved_elements_computation(alignment_id_aves, clade_2, chrs,
+                required_feats_func = required_species_features_sarcopterygii_77way)
+
+print(result_77_sarc)
+
+conserved_elements_in_common(result_77_aves, result_77_sarc,
+                                         alignment_id_aves,
+                                         clade_1, clade_2, chr_aves)
+
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

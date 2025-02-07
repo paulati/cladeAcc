@@ -1,5 +1,3 @@
-library(tools)
-library(dplyr)
 
 
 # where to save data?
@@ -29,74 +27,73 @@ library(dplyr)
 
 # private functions
 
-options(timeout = max(300, getOption("timeout")))
-
-# generic function to download data from specified url
-download_data <- function(url,
-                          tmp_storage_relative_path = '',
-                          force_download = FALSE) {
-
-    tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
-    dir.create(tmp_base_dir, recursive = TRUE, showWarnings = FALSE)
-
-    if(nchar(tmp_storage_relative_path) == 0) {
-        data_base_dir <- tmp_base_dir
-    } else {
-        data_base_dir <- file.path(tmp_base_dir, tmp_storage_relative_path)
-        dir.create(data_base_dir, recursive = TRUE, showWarnings = FALSE)
-    }
-
-    setwd(data_base_dir)
-
-    file_name <- basename(url)
-
-    data_file_path <- file.path(data_base_dir, file_name)
-    if(file.exists(data_file_path)) {
-        if(force_download) {
-            download.file(url, file_name)
-        }
-    } else {
-
-        download.file(url, file_name)
-    }
-
-    local_data_file_path <- file.path(data_base_dir, file_name)
-
-    return(local_data_file_path)
-}
-
 # alignment_id <- '100_way'
 # chr <- 22
 # alignment_id in {100_way, 77_way}
-download_file <- function(alignment_id, chr) {
+download_multiz_file <- function(alignment_id, chr) {
 
     config <- load_config()
     alignment_source_config <- config$data_preparation$source[[alignment_id]]
     url <- file.path(alignment_source_config$base_url,
                   glue::glue(alignment_source_config$file_name_pattern))
-    tmp_storage_relative_path <- file.path(alignment_id, 'raw')
+    # tmp_storage_relative_path <- file.path(alignment_id, 'raw')
+    tmp_storage_relative_path <- multiz_alignment_relative_path(alignment_id)
     file_path <- download_data(url, tmp_storage_relative_path,
                                force_download = FALSE)
     return(file_path)
 }
 
-get_md5_data <- function(alignment_id) {
+download_neutral_model_file <- function(alignment_id) {
 
     config <- load_config()
-    alignment_source_config <- config$data_preparation$source[[alignment_id]]
-    url <- file.path(alignment_source_config$base_url,
-                     alignment_source_config$md5_file_name)
-    tmp_storage_relative_path <- file.path(alignment_id, 'raw')
+    neutral_model_config <- config$conservation$neutral_model[[alignment_id]]
+    url <- file.path(neutral_model_config$base_url, neutral_model_config$file_name)
+    tmp_storage_relative_path <- neutral_model_relative_path(alignment_id)
     file_path <- download_data(url, tmp_storage_relative_path,
                                force_download = FALSE)
+    return(file_path)
+}
+
+
+
+get_md5_multiz_data <- function(alignment_id, force_download = FALSE) {
+
+    config <- load_config()
+
+    alignments_config <- config$data_preparation$source[[alignment_id]]
+
+    url <- file.path(alignments_config$base_url, alignments_config$md5_file_name)
+
+    tmp_storage_relative_path <- multiz_alignment_relative_path(alignment_id)
+    file_path <- download_data(url, tmp_storage_relative_path,
+                               force_download)
 
     md5_data_tmp <- read.delim(file_path, sep = " ", header = FALSE)
     data_col_names <- c('value', 'file')
-    md5_data <- md5_data_tmp |> select(V1, V3) |> setNames(all_of(data_col_names))
+    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |> setNames(all_of(data_col_names))
 
     return(md5_data)
 }
 
+
+get_md5_neutral_model_data <- function(alignment_id, force_download = FALSE) {
+
+    config <- load_config()
+    neutral_model_config <- config$conservation$neutral_model[[alignment_id]]
+    url <- file.path(neutral_model_config$base_url,
+                     neutral_model_config$md5_file_name)
+    # tmp_storage_relative_path <- file.path(alignment_id, 'raw')
+    tmp_storage_relative_path <- neutral_model_relative_path(alignment_id)
+    file_path <- download_data(url, tmp_storage_relative_path,
+                               force_download)
+
+    md5_data_tmp <- read.delim(file_path, sep = " ", header = FALSE)
+    data_col_names <- c('value', 'file')
+    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |> setNames(all_of(data_col_names))
+
+    return(md5_data)
+
+}
 
 check_md5 <- function(file_path, md5_data) {
 
@@ -109,12 +106,11 @@ check_md5 <- function(file_path, md5_data) {
     file_name <- basename(file_path)
     target_value <- md5_data |>
         filter(file == file_name) |>
-        select(value) |>
+        dplyr::select(value) |>
         pull()
     ok <- md5_value == target_value
     return(ok)
 }
-
 
 save_file_to_local_storage <- function(tmp_path) {
 
@@ -142,7 +138,8 @@ clean_data_preparation_folders <- function(clean_tmp = TRUE,
                                            clean_aws_storage = FALSE) {
 
     if(clean_tmp) {
-        tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
+        # tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
+        tmp_base_dir <- pkg_data_tmp_base_path()
         # delete all files and folder in this directory
         unlink(tmp_base_dir, recursive = TRUE)
     }
@@ -172,7 +169,7 @@ prepare_alignment_files <- function(alignment_id, chrs, local_storage = FALSE,
                           aws_storage = TRUE) {
 
     # reuse the same md5_data object for all chrs
-    md5_data <- get_md5_data(alignment_id)
+    md5_data <- get_md5_multiz_data(alignment_id)
 
     lapply(chrs, function(x) prepare_alignment_file(alignment_id, x, md5_data,
                                                     local_storage, aws_storage))
@@ -198,11 +195,11 @@ prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
 
 
     #download data
-    file_path <- download_file(alignment_id, chr)
+    file_path <- download_multiz_file(alignment_id, chr)
 
     # check md5
     if (is.na(md5_data)) {
-        md5_data <- get_md5_data(alignment_id)
+        md5_data <- get_md5_multiz_data(alignment_id)
     }
 
     download_ok <- check_md5(file_path, md5_data)
@@ -222,5 +219,32 @@ prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
 
 
 
+prepare_neutral_model_file <- function(alignment_id, md5_data = NA,
+                                local_storage = FALSE, aws_storage = TRUE){
+
+    #download data
+    file_path <- download_neutral_model_file(alignment_id)
+
+    # check md5
+    if (is.na(md5_data)) {
+        md5_data <- get_md5_neutral_model_data(alignment_id)
+    }
+
+    download_ok <- check_md5(file_path, md5_data)
+
+    if(download_ok) {
+
+        # save file local / aws
+
+
+    } else {
+        msg <- paste0('error downloading chr' , chr, ' ',  alignment_id,
+                      ' alignment.')
+        print(msg)
+    }
+
+
+
+}
 
 

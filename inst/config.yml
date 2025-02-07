@@ -27,10 +27,29 @@ server:
             aws:
                 base_url:
     conservation:
+        alignments:
+            - 100_way
+            - 77_way
+        clades:
+            - mammals
+            - aves
+            - sarcopterygii
+        neutral_model:
+            100_way:
+                base_url: https://hgdownload.cse.ucsc.edu/goldenpath/hg38/phastCons100way
+                file_name:  hg38.phastCons100way.mod
+                md5_file_name: md5sum.txt
+            77_way:
+                base_url: https://hgdownload.soe.ucsc.edu/goldenPath/galGal6/phastCons77way
+                file_name:  galGal6.phastCons77way.mod
+                md5_file_name: md5sum.txt
         filtering:
             100_way:
-                fruits: ['Apple', 'Orange', 'Strawberry', 'Mango']
+                mammals: ['hg38', 'otoGar3', 'rheMac3', 'mm10', 'oryCun2', 'ochPri3', 'susScr3', 'turTru2', 'bosTau8', 'felCat8', 'myoLuc2', 'loxAfr3', 'echTel2', 'dasNov3', 'monDom5', 'macEug2', 'ornAna1']
+                sarcopterygii: ['hg38', 'allMis1', 'cheMyd1', 'chrPic2', 'pelSin1', 'apaSpi1', 'anoCar2', 'xenTro7', 'latCha1']
             77_way:
+                aves: ['galGal6', 'cotJap2', 'melGal5', 'tytAlb1', 'bucRhi1', 'anaPla1', 'apaVit1', 'calAnn1', 'cucCan1', 'chaVoc2', 'fulGla1', 'tauEry1', 'opiHoa1', 'phoRub1', 'colLiv1', 'lepDis1', 'merNub1', 'pelCri1', 'phaCar1', 'phaLep1', 'pteGut1', 'nipNip1', 'egrGar1', 'pygAde1', 'aptFor1', 'carCri1', 'mesUni1', 'eurHel1', 'balPav1', 'chlUnd1', 'falChe1', 'falPer1', 'aquChr2', 'halAlb1', 'halLeu1', 'corBra1', 'corCor1', 'acaChl1', 'ficAlb2', 'serCan1', 'zonAlb1', 'geoFor1', 'taeGut2', 'pseHum1', 'gavSte1', 'capCar1', 'melUnd1', 'amaVit1', 'araMac1', 'colStr1', 'picPub1', 'strCam1', 'tinGut2']
+                sarcopterygii: ['galGal6', 'allMis1', 'cheMyd1', 'chrPic2', 'pelSin1', 'apaSpi1', 'anoCar2', 'xenTro9']
 
 
 
