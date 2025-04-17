@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: MIT License
 Encoding: UTF-8
 LazyData: true
-Imports: tools, config, glue, devtools, dplyr, rphast, aws.s3, R.utils, knitr, factoextra, ggplot2, aws.s3, R.utils, ape, BiocManager, GenomicRanges
+Imports: tools, config, glue, devtools, dplyr, rphast, aws.s3, e1071, R.utils, knitr, factoextra, ggplot2, aws.s3, R.utils, ape, BiocManager, GenomicRanges, IRanges, S4Vectors
 URL: https://github.com/paulati/cladeAcc
 RoxygenNote: 7.3.2
 
