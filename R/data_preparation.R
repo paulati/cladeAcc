@@ -70,7 +70,8 @@ get_md5_multiz_data <- function(alignment_id, force_download = FALSE) {
 
     md5_data_tmp <- read.delim(file_path, sep = " ", header = FALSE)
     data_col_names <- c('value', 'file')
-    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |> setNames(all_of(data_col_names))
+    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |>
+        setNames(dplyr::all_of(data_col_names))
 
     return(md5_data)
 }
@@ -89,7 +90,8 @@ get_md5_neutral_model_data <- function(alignment_id, force_download = FALSE) {
 
     md5_data_tmp <- read.delim(file_path, sep = " ", header = FALSE)
     data_col_names <- c('value', 'file')
-    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |> setNames(all_of(data_col_names))
+    md5_data <- md5_data_tmp |> dplyr::select(V1, V3) |>
+        setNames(dplyr::all_of(data_col_names))
 
     return(md5_data)
 
@@ -102,14 +104,19 @@ check_md5 <- function(file_path, md5_data) {
     # alignment_id <- '100_way'
     # md5_data <- get_md5_data(alignment_id)
 
-    md5_value <- md5sum(file_path)
+    colnames(md5_data) <- c('md5', 'file_id')
+
+    md5_value <- tools::md5sum(file_path)
     file_name <- basename(file_path)
     target_value <- md5_data |>
-        filter(file == file_name) |>
-        dplyr::select(value) |>
-        pull()
+        dplyr::filter(file_id == file_name) |>
+        dplyr::select(md5) |>
+        dplyr::pull()
     ok <- md5_value == target_value
+
     return(ok)
+
+    #md5_data$file == file_name
 }
 
 save_file_to_local_storage <- function(tmp_path) {
@@ -163,10 +170,10 @@ clean_data_preparation_folders <- function(clean_tmp = TRUE,
 #' @param local_storage boolean Save alignments to local storage
 #' (default value FALSE)
 #' @param aws_storage boolean Save alignments to aws storage
-#' (default value TRUE)
+#' (default value FALSE)
 #' @export
 prepare_alignment_files <- function(alignment_id, chrs, local_storage = FALSE,
-                          aws_storage = TRUE) {
+                          aws_storage = FALSE) {
 
     # reuse the same md5_data object for all chrs
     md5_data <- get_md5_multiz_data(alignment_id)
@@ -184,21 +191,21 @@ prepare_alignment_files <- function(alignment_id, chrs, local_storage = FALSE,
 #' @param local_storage boolean Save alignments to local storage
 #' (default value FALSE)
 #' @param aws_storage boolean Save alignments to aws storage
-#' (default value TRUE)
+#' (default value FALSE)
 #' @export
 prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
-                         local_storage = FALSE, aws_storage = TRUE) {
+                         local_storage = FALSE, aws_storage = FALSE) {
 
     # debug:
     # alignment_id <- '100_way'
-    # chr <- 22
+    # chr <- 17
 
 
     #download data
     file_path <- download_multiz_file(alignment_id, chr)
 
     # check md5
-    if (is.na(md5_data)) {
+    if (anyNA(md5_data)) {
         md5_data <- get_md5_multiz_data(alignment_id)
     }
 
@@ -218,15 +225,23 @@ prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
 }
 
 
-
+#' Prepare neutral model for specified alignment
+#' @param alignment_id char One of these possible values (100_way, 77_way)
+#' @param md5_data data.frame Data frame containing target md5 values
+#' (default value NA)
+#' @param local_storage boolean Save alignments to local storage
+#' (default value FALSE)
+#' @param aws_storage boolean Save alignments to aws storage
+#' (default value FALSE)
+#' @export
 prepare_neutral_model_file <- function(alignment_id, md5_data = NA,
-                                local_storage = FALSE, aws_storage = TRUE){
+                                local_storage = FALSE, aws_storage = FALSE){
 
     #download data
     file_path <- download_neutral_model_file(alignment_id)
 
     # check md5
-    if (is.na(md5_data)) {
+    if (anyNA(md5_data)) {
         md5_data <- get_md5_neutral_model_data(alignment_id)
     }
 
