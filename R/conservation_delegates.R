@@ -1,3 +1,6 @@
+#' Delegate function for ....
+#' @param align multiple ...
+#' @export
 required_species_features_mammals_100way <- function(align)
 {
 
@@ -39,6 +42,9 @@ required_species_features_mammals_100way <- function(align)
 
 }
 
+#' Delegate function for ....
+#' @param align multiple ...
+#' @export
 required_species_features_sarcopterygii_100way <- function(align)
 {
     cons_req_species <- c("allMis1", "anoCar2")
@@ -66,6 +72,9 @@ required_species_features_sarcopterygii_100way <- function(align)
 
 }
 
+#' Delegate function for ....
+#' @param align multiple ...
+#' @export
 required_species_features_aves_77way <- function(align) {
 
     alignment_species <- rphast::names.msa(align)
@@ -140,7 +149,9 @@ required_species_features_aves_77way <- function(align) {
 
 }
 
-
+#' Delegate function for ....
+#' @param align multiple ...
+#' @export
 required_species_features_sarcopterygii_77way <- function(align) {
 
     alignment_species <- rphast::names.msa(align)

@@ -1,45 +1,14 @@
 # private
-bed_to_feat <- function(data_bed) {
 
-    result <- rphast::feat(seqname = data_bed$V1,
-                   start = data_bed$V2,
-                   end = data_bed$V3,
-                   score = data_bed$V5,
-                   strand = data_bed$V6,
-                   attribute = data_bed$V4)
-
-    return(result)
-}
-
-
-
-# --------------------------------------------------------------------
-# public functions
-# --------------------------------------------------------------------
-
-conserved_elements_computation <- function(alignment_id, clade, chrs,
-                                           required_feats_func) {
-
-
-
-    chr <- chrs[1]
-
-    # debug:
-    # chr <- 22
-    # alignment_id <- '100_way'
-    # clade <- 'sarcopterygii'
-    # required_feats_func <- required_species_features_sarcopterygii_100way
-
-    config <- load_config()
-    filtering_config <- config$conservation$filtering[[alignment_id]]
-    sequence_names <- filtering_config[[clade]]
+conserved_elements_computation_chr <- function(alignment_id, clade, chr,
+                                    sequence_names, required_feats_func) {
 
     align <- load_multiz_alignment(alignment_id, chr, sequence_names)
 
-    neutral_model <- load_neutral_model(alignment_id)
+    neutral_model <- load_neutral_model(alignment_id, step = "cons")
 
     elements <- rphast::phastCons(align, neutral_model, expected.length=45,
-                          target.coverage = 0.3, rho = 0.3, viterbi = TRUE)
+                                  target.coverage = 0.3, rho = 0.3, viterbi = TRUE)
 
     required_feats <- required_feats_func(align)
 
@@ -53,43 +22,100 @@ conserved_elements_computation <- function(alignment_id, clade, chrs,
 
     out_file_name <- conserved_mostConserved_file_name(chr)
     out_file_path <- save_conserved_elements(elements = conserved_elements,
-                        alignment_id = alignment_id, clade = clade,
-                        output_file_name = out_file_name)
-
-    rm()
-    gc()
+                                             alignment_id = alignment_id,
+                                             clade = clade,
+                                             output_file_name = out_file_name)
 
 
-    # TODO
-    if(is.na(chrs)) {
+    return(out_file_path)
+}
 
-        #puede venir un vector de chrs
+
+
+
+# --------------------------------------------------------------------
+# public functions
+# --------------------------------------------------------------------
+
+
+#' Compute conservation for clade species
+#' @param alignment_id char One of these possible values (100_way, 77_way)
+#' @param clade to complete
+#' @param chrs description
+#' @param required_feats_func delegate to function
+#' @export
+conserved_elements_computation <- function(alignment_id, clade, chrs = NA,
+                                           required_feats_func) {
+
+    if(anyNA(chrs)) {
+
+        # TODO: process all
+        out_file_paths <- NA
 
     } else {
 
+        out_file_paths <- lapply(chrs, function(chr) {
 
+            # debug:
+            # chr <- 17
+            # alignment_id <- '100_way'
+            # clade <- 'sarcopterygii'
+            # required_feats_func <- required_species_features_sarcopterygii_100way
 
+            config <- load_config()
+            filtering_config <- config$conservation$filtering[[alignment_id]]
+            sequence_names <- filtering_config[[clade]]
+
+            conserved_elements_file_path <-
+                conserved_elements_computation_chr(alignment_id, clade, chr,
+                                                   sequence_names, required_feats_func)
+
+            rm()
+            gc()
+
+            return(conserved_elements_file_path)
+
+        })
+
+        names(out_file_paths) <- chrs
 
     }
 
-
-    #debug:
-    return(out_file_path)
+    return(out_file_paths)
 }
 
 
 
 # conserved_path_1 <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/conservation/mammals/chr22_mostConserved.bed'
 # conserved_path_2 <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/conservation/sarcopterygii/chr22_mostConserved.bed'
-conserved_elements_in_common <- function(conserved_path_1, conserved_path_2,
-                                         alignment_id,
-                                         clade_1, clade_2, chr) {
 
-    bed_1 <- read.delim(conserved_path_1, sep = '\t', header = FALSE)
-    bed_2 <- read.delim(conserved_path_2, sep = '\t', header = FALSE)
 
-    feat_1 <- bed_to_feat(bed_1)
-    feat_2 <- bed_to_feat(bed_2)
+#' Compute intersection between elements sets
+#' @param alignment_id char One of these possible values (100_way, 77_way)
+#' @param clade_1 to complete
+#' @param clade_2 to complete
+#' @param chr description
+#' @param conserved_path_1 description
+#' @param conserved_path_2 description
+#' @export
+conserved_elements_in_common <- function(alignment_id,
+                                         clade_1, clade_2, chr,
+                                         conserved_path_1 = NA,
+                                         conserved_path_2 = NA) {
+
+    if(! is.na(conserved_path_1)) {
+        bed_1 <- read.delim(conserved_path_1, sep = '\t', header = FALSE)
+        feat_1 <- bed_to_feat(bed_1)
+    } else {
+        feat_1 <- load_conserved_elements(alignment_id, clade_1, chr)
+    }
+
+    if(! is.na(conserved_path_2)) {
+        bed_2 <- read.delim(conserved_path_2, sep = '\t', header = FALSE)
+        feat_2 <- bed_to_feat(bed_2)
+    } else {
+        feat_2 <- load_conserved_elements(alignment_id, clade_2, chr)
+    }
 
     regions_in_common <- rphast::coverage.feat(feat_1, feat_2,
                                           or = FALSE, get.feats = TRUE)
