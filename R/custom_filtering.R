@@ -1,48 +1,5 @@
 
 
-# step 3 or 4 ?
-# alignment_id <- '100_way'
-# clade <- 'mammals_sarcopterygii'
-# chr <- 22
-calculate_conserved_elements <- function(alignment_id, clade, chr) {
-
-    data <- load_conserved_elements(alignment_id, clade, chr, in_common = TRUE)
-
-    data_gr <- GenomicRanges::makeGRangesFromDataFrame(data)
-
-    distance_threshold <- 20
-    length_threshold <- 100
-    data_gr_reduced <- GenomicRanges::reduce(data_gr, drop.empty.ranges=FALSE,
-                         min.gapwidth = distance_threshold,
-                         with.revmap=FALSE, with.inframe.attrib=FALSE)
-    # min.gapwidth Ranges separated by a gap of at least min.gapwidth positions are not merged
-    data_gr_reduced_length_filter <- data_gr_reduced[
-        IRanges::width(data_gr_reduced) >= length_threshold]
-
-    data_gr_reduced_length_filter$id <- c(1:length(data_gr_reduced_length_filter))
-
-    data_gr_reduced_length_filter <- data.frame(data_gr_reduced_length_filter)
-
-    output_file_name <- conserved_filtered_file_name(chr)
-    out_file_path <- save_conserved_elements(data_gr_reduced_length_filter,
-                                        alignment_id, clade,
-                                        output_file_name, filtered = TRUE,
-                                        format = 'data.frame')
-
-    # out.file.path <- file.path(base_path, "mammals/data/results",
-    #                            "intersection_modneu_phastCons100way_sarcopterygii_mammals_functional_elements.bed")
-    # # "/paula/2018/acc_regions/resultados/intersection_modneu_phastCons100way_sarcopterygii_mammals_functional_elements.bed"
-    # write.table(gr.util.df, out.file.path, sep="\t", quote = FALSE, col.names = TRUE, row.names = FALSE)
-
-    #return(gr.util)
-
-    return(out_file_path)
-
-
-
-}
-
-
 # acc_scoring <- acc_scoring_gr
 # cons_filtered <- conservation_gr
 combine_data <- function(acc_scoring, cons_filtered) {
@@ -89,10 +46,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
         alignment_id, chr, ingroup_clade, outgroup_clade,
         split_lengths = c(25, 50))
 
-    #TODO: hacer una funcion que me devuelva los paths para debug
-    # y para usar de params en cada uno de los pasos siguentes
-    # hacer algunos check para no recalcular lo que ya existe
-
 
     print(elements_alignments_paths)
 
@@ -102,19 +55,7 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
         calculate_elements_consensus_sequences(alignment_id, chr, ingroup_clade,
                                     outgroup_clade, feat_lengths)
 
-    if(debug) {
 
-        consensus_sequences_paths <- list(
-            'len_25' = list(
-                'consensus_ingroup_file_path' = '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/25/consensus_sequence/chr17_consensus_25.txt',
-                'consensus_outgroup_file_path' = '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/25/consensus_sequence/chr17_consensus_25.txt'
-            ),
-            'len_50' = list(
-                'consensus_ingroup_file_path' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/50/consensus_sequence/chr17_consensus_50.txt",
-                'consensus_outgroup_file_path' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/50/consensus_sequence/chr17_consensus_50.txt"
-            )
-        )
-    }
 
     print(consensus_sequences_paths)
 
@@ -123,12 +64,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
     acc_scoring_paths <- calculate_acc_scoring(alignment_id, ingroup_clade,
                             outgroup_clade, feat_lengths, chr)
 
-    if(debug) {
-        acc_scoring_paths <- list(
-            'len_25' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/score_raw/25/chr17_score_25.csv",
-            'len_50' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/score_raw/50/chr17_score_50.csv"
-        )
-    }
 
     print(acc_scoring_paths)
 
@@ -138,13 +73,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
                                     alignment_id, ingroup_clade, feat_lengths,
                                     chr)
 
-    if(debug) {
-
-        filter_acc_scoring_path <- list(
-            'len_25' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals/acceleration/score_filtered/25/chr17_score_25_filtered_norm.csv",
-            'len_50' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals/acceleration/score_filtered/50/chr17_score_50_filtered_norm.csv"
-            )
-    }
 
     print(filter_acc_scoring_path)
 
@@ -154,14 +82,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
     score_cons_raw_file_paths <- calculate_cons_scoring(alignment_id,
                         cons_clade, feat_lengths, chr, acc_scoring_paths)
 
-    if(debug) {
-
-        score_cons_raw_file_paths <- list(
-            'len_25' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals_sarcopterygii/candidate_elements/score_raw/25/chr17_score_25.csv",
-            'len_50' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals_sarcopterygii/candidate_elements/score_raw/50/chr17_score_50.csv"
-        )
-    }
-
     print(score_cons_raw_file_paths)
 
     print('processing step 6 / 6')
@@ -169,12 +89,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
     score_cons_file_paths <- filter_cons_scoring(score_cons_raw_file_paths,
                                 alignment_id, cons_clade, feat_lengths, chr)
 
-    if(debug) {
-        score_cons_file_paths <- list(
-            'len_25' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals_sarcopterygii/candidate_elements/score_filtered/25/chr17_score_25.csv",
-            'len_50' = "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/custom_filtering/mammals_sarcopterygii/candidate_elements/score_filtered/50/chr17_score_50.csv"
-        )
-    }
 
     print(score_cons_file_paths)
 
@@ -193,13 +107,13 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
 #' @export
 process_filtering <- function(alignment_id, clade, chrs) {
 
-    if(clade == 'mammals') {
+    if(clade == 'mammals' || clade == 'mammals_sarcopterygii') {
 
         ingroup_clade <- 'mammals'
         outgroup_clade <- 'sarcopterygii'
 
 
-    } else if(clade == 'aves') {
+    } else if(clade == 'aves' || clade == 'aves_sarcopterygii') {
 
         ingroup_clade <- 'aves'
         outgroup_clade <- 'sarcopterygii'
@@ -215,7 +129,8 @@ process_filtering <- function(alignment_id, clade, chrs) {
 }
 
 #-----------------------------------------
-#TODO: analizar todo por cromosoma, al final hacer los joins de todos los archivos, arreglar los id de phastcons, que quede un unico archivo final
+#TODO: analizar todo por cromosoma, al final hacer los joins de todos los archivos,
+# arreglar los id de phastcons, que quede un unico archivo final
 #-----------------------------------------
 
 

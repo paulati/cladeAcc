@@ -6,6 +6,19 @@ pkg_data_tmp_base_path <- function() {
     return(result)
 }
 
+user_data_base_path <- function() {
+
+    if(exists(user_base_path)) {
+        if(!dir.exists(user_base_path)) {
+            dir.create(user_base_path, showWarnings = FALSE, recursive = TRUE)
+        }
+        result <- user_base_path
+    } else {
+        result <- NA
+    }
+    return(result)
+}
+
 # ----------------------------------------------------------
 # multiple alignment
 
@@ -195,6 +208,31 @@ acc_raw_scoring_paths <- function(alignment_id, clade, feat_length, chr){
     return(result)
 }
 
+acc_filtered_scoring_path <- function(alignment_id, clade, feat_length, chr){
+
+    base_path <- custom_filtering_base_path(alignment_id, clade)
+    out_base_path <- file.path(base_path, 'acceleration', 'score_filtered',
+                               feat_length)
+    if(!dir.exists(out_base_path)) {
+        dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
+    }
+    out_file_name <- paste0('chr', chr, '_score_', feat_length,
+                            '_filtered_norm.csv')
+    out_file_path <- file.path(out_base_path, out_file_name)
+
+    result <- list('tmp' = out_file_path,
+                   'tmp_gz' = paste0(out_file_path, '.gz'),
+                   'local' = '',
+                   'local_gz' = '',
+                   'aws_gz' = '')
+
+    return(result)
+
+
+}
+
+
+
 # ----------------------------------------------------------
 # neutral model
 
@@ -271,6 +309,23 @@ conserved_filtered_file_name <- function(chr) {
     return(result)
 }
 
+# ----------------------------------------------------------
+# candidate elements
+
+candidate_elements_raw_scoring_path <- function(alignment_id, clade,
+                                                feat_length, chr) {
+
+    base_path <- custom_filtering_base_path(alignment_id, clade)
+    out_base_path <- file.path(base_path, 'candidate_elements', 'score_raw',
+                               feat_length)
+    if(!dir.exists(out_base_path)) {
+        dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
+    }
+
+    file_name <- paste0('chr', chr, '_score_', feat_length, '.csv')
+    result <- file.path(out_base_path, file_name)
+    return(result)
+}
 
 
 

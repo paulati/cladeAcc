@@ -29,30 +29,6 @@ extract_elements_alignments_fasta <- function(alignment_id, chr, ingroup_clade,
 
     names(elements_alignments_paths) <- paste0('len_', split_lengths)
 
-    # elements_file_path <- "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/non_parametric_phyloP/25/chr22_non_parametric_phyloP_25.csv"
-    # alignment_id <- '100_way'
-    # chr <- 22
-    # ingroup_clade <- 'mammals'
-    # outgroup_clade <- 'sarcopterygii'
-
-
-
-    # elements_file_path <- "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/non_parametric_phyloP/50/chr22_non_parametric_phyloP_50.csv"
-    # alignment_id <- '100_way'
-    # chr <- 22
-    # ingroup_clade <- 'mammals'
-    # outgroup_clade <- 'sarcopterygii'
-
-    # ingroup
-    # ingroup_alignments_paths <- extract_fasta_alignments(elements_file_path,
-    #                                                      alignment_id, chr,
-    #                                                      ingroup_clade)
-
-    # outgroup
-    # outgroup_alignemnts_paths <- extract_fasta_alignments(elements_file_path,
-    #                                                       alignment_id, chr,
-    #                                                       outgroup_clade)
-
 
     return(elements_alignments_paths)
 

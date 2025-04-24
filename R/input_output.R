@@ -517,15 +517,19 @@ load_acc_raw_scoring <- function(file_path) {
 save_acc_filtered_scoring <- function(data, alignment_id,
                                       clade, feat_length, chr) {
 
-    base_path <- custom_filtering_base_path(alignment_id, clade)
-    out_base_path <- file.path(base_path, 'acceleration', 'score_filtered',
-                               feat_length)
-    if(!dir.exists(out_base_path)) {
-        dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
-    }
-    out_file_name <- paste0('chr', chr, '_score_', feat_length,
-                            '_filtered_norm.csv')
-    out_file_path <- file.path(out_base_path, out_file_name)
+    # base_path <- custom_filtering_base_path(alignment_id, clade)
+    # out_base_path <- file.path(base_path, 'acceleration', 'score_filtered',
+    #                            feat_length)
+    # if(!dir.exists(out_base_path)) {
+    #     dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
+    # }
+    # out_file_name <- paste0('chr', chr, '_score_', feat_length,
+    #                         '_filtered_norm.csv')
+    # out_file_path <- file.path(out_base_path, out_file_name)
+
+    acc_filtered_scoring_paths <- acc_filtered_scoring_path(alignment_id,
+                                                    clade, feat_length, chr)
+    out_file_path <- acc_filtered_scoring_paths$tmp
 
     #     /u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/scoring/25
     # chr22_score_25_filtered_elements_norm.csv
@@ -548,15 +552,18 @@ load_acc_filtered_scoring <- function(file_path) {
 save_candidate_elements_raw_scoring <- function(data, alignment_id, clade,
                                                 feat_length, chr) {
 
-    base_path <- custom_filtering_base_path(alignment_id, clade)
-    out_base_path <- file.path(base_path, 'candidate_elements', 'score_raw',
-                               feat_length)
-    if(!dir.exists(out_base_path)) {
-        dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
-    }
+    file_path <- candidate_elements_raw_scoring_path(alignment_id, clade,
+                                        feat_length, chr)
 
-    file_name <- paste0('chr', chr, '_score_', feat_length, '.csv')
-    file_path <- file.path(out_base_path, file_name)
+    # base_path <- custom_filtering_base_path(alignment_id, clade)
+    # out_base_path <- file.path(base_path, 'candidate_elements', 'score_raw',
+    #                            feat_length)
+    # if(!dir.exists(out_base_path)) {
+    #     dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
+    # }
+    #
+    # file_name <- paste0('chr', chr, '_score_', feat_length, '.csv')
+    # file_path <- file.path(out_base_path, file_name)
     write.table(data, file = file_path, sep = '\t', col.names = TRUE,
                 row.names = FALSE, quote = FALSE)
 

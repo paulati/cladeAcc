@@ -50,7 +50,6 @@ calculate_elements_consensus_sequences <- function(alignment_id, chr,
         fasta_base_path_in <- fasta_alignment_base_paths(alignment_id,
                                             ingroup_clade, feat_length, chr)
 
-        # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/25/chr22'
 
         consensus_in_file_path <- calculate_consensus_sequences(alignment_id,
                                     ingroup_clade, fasta_base_path_in$tmp,
@@ -61,10 +60,11 @@ calculate_elements_consensus_sequences <- function(alignment_id, chr,
                                                          outgroup_clade,
                                                          feat_length, chr)
 
-        # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/25/chr22'
-
-        consensus_out_file_path <- calculate_consensus_sequences(alignment_id, outgroup_clade,
-                                      fasta_base_path_out$tmp, chr, feat_length)
+        consensus_out_file_path <- calculate_consensus_sequences(alignment_id,
+                                    outgroup_clade,
+                                    fasta_base_path_out$tmp,
+                                    chr,
+                                    feat_length)
 
         result <- list('consensus_ingroup_file_path' = consensus_in_file_path,
                        'consensus_outgroup_file_path' = consensus_out_file_path )
@@ -75,26 +75,6 @@ calculate_elements_consensus_sequences <- function(alignment_id, chr,
     names(result) <- paste0('len_', feat_lengths)
 
     return(result)
-
-
-    # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/25/chr22'
-    #
-    # calculate_consensus_sequences(alignment_id = '100_way', clade = 'sarcopterygii',
-    #                               fasta_base_path = fasta_base_path,
-    #                               chr = 22, feat_length = 25)
-    #
-    #
-    # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/50/chr22'
-    #
-    # calculate_consensus_sequences(alignment_id = '100_way', clade = 'mammals',
-    #                               fasta_base_path = fasta_base_path,
-    #                               chr = 22, feat_length = 50)
-    #
-    # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/50/chr22'
-    #
-    # calculate_consensus_sequences(alignment_id = '100_way', clade = 'sarcopterygii',
-    #                               fasta_base_path = fasta_base_path,
-    #                               chr = 22, feat_length = 50)
 
 
 

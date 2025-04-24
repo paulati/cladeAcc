@@ -22,14 +22,15 @@ filter_cons_scoring_len <- function(score_cons_raw_file_path, alignment_id,
         # print(index.no.gaps)
 
         if(length(index_no_gaps) > 0) {
-            conserved_element_shift_count.exclgt0gap  <- sum(shifts_count[index_no_gaps])
+            conserved_element_shift_count_exclgt0gap  <-
+                sum(shifts_count[index_no_gaps])
             acc_elements_count_exclgt0gap <- length(index_no_gaps)
         } else {
-            conserved_element_shift_count.exclgt0gap <- 0
+            conserved_element_shift_count_exclgt0gap <- 0
             acc_elements_count_exclgt0gap <- 0
         }
 
-        result <- c(conserved_element_shift_count.exclgt0gap,
+        result <- c(conserved_element_shift_count_exclgt0gap,
                     acc_elements_count_exclgt0gap)
 
         return(result)
@@ -37,16 +38,17 @@ filter_cons_scoring_len <- function(score_cons_raw_file_path, alignment_id,
     })
 
     new_columns_df <- do.call(rbind, new_columns)
-    colnames(new_columns_df) <- c('conserved_element_shift_count.exclgt0gap',
+    colnames(new_columns_df) <- c('conserved_element_shift_count_exclgt0gap',
                                   'acc_elements_count_exclgt0gap')
 
     data <- cbind(data, new_columns_df)
 
     #conservo los registros que tienen al menos un acelerado sin gaps
-    conserved_element_data_oneacczerogap <- data |> dplyr::filter(acc_elements_count_exclgt0gap > 0)
+    conserved_element_data_oneacczerogap <- data |>
+        dplyr::filter(acc_elements_count_exclgt0gap > 0)
 
-    conserved_element_data_oneacczerogap$conserved_element_shift_count.exclgt0gap_rel <-
-        conserved_element_data_oneacczerogap$conserved_element_shift_count.exclgt0gap /
+    conserved_element_data_oneacczerogap$conserved_element_shift_count_exclgt0gap_rel <-
+        conserved_element_data_oneacczerogap$conserved_element_shift_count_exclgt0gap /
         conserved_element_data_oneacczerogap$phastCons_width
 
     # fitered.data$functional.element.shift.count.exclgt0gap_rel <- fitered.data$functional_element_shift_count_exclgt0gap / fitered.data$width
