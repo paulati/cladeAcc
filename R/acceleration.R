@@ -4,8 +4,9 @@
 split_candidate_regions <- function(alignment_id, clade, chr, feat_length) {
 
 
-    base_path <- acc_candidate_elements_path(alignment_id, clade, feat_length)
-    if(! dir.exists(base_path)) {
+    base_path <- acc_candidate_elements_path(alignment_id, clade,
+                                                 feat_length)
+    if(! file.exists(base_path)) {
         dir.create(base_path, recursive = TRUE)
     }
     file_name <- paste0("chr", chr, "_", clade, "_feat_",  feat_length, ".csv")

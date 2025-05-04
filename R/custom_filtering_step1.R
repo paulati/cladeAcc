@@ -34,6 +34,57 @@ extract_elements_alignments_fasta <- function(alignment_id, chr, ingroup_clade,
 
 }
 
+extract_fasta_alignments_core <- function(x, feats, alignment_id, clade,
+                                          chr, sequence_names) {
+
+    feat <- feats[x, ]
+    start <- as.integer(feat$start)
+    end <- as.integer(feat$end)
+    feat_length <- end - start + 1
+
+    out_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
+                                        chr, start, end)
+
+    result <- out_file_path
+
+    #if(! file.exists(out_file_path$path)) {
+    #
+    #     if(is.na(alignment)) {
+    #         alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
+    #     }
+    #
+    #     feat_alignment <- rphast::extract.feature.msa(
+    #         rphast::copy.msa(alignment),
+    #         feat, do4d = FALSE,
+    #         pointer.only = FALSE)
+    #
+    #     # replace all * by N (DNA_ALPHABET
+    #     # "A" "C" "G" "T" "M" "R" "W" "S" "Y" "K" "V" "H" "D" "B" "N" "-" "+" ".")
+    #     # in order to read fasta format later
+    #
+    #     replace_asterix_by_N <- stringr::str_replace_all(feat_alignment$seqs,
+    #                                                      pattern = "\\*",
+    #                                                      replacement = "N")
+    #
+    #     feat_alignment$seqs <- replace_asterix_by_N
+    #
+    #     rphast::write.msa(feat_alignment,
+    #                       file = out_file_path$path,
+    #                       format = "FASTA",
+    #                       pretty.print = FALSE)
+    #
+    #     result <- out_file_path$path
+    #
+    #     rm()
+    #     gc()
+    #
+    #}
+
+    return(result)
+
+}
+
+
 
 extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
                                      clade) {
@@ -70,57 +121,32 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
     feat_length <- dummy_end - dummy_start + 1
     dummy_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
                                              dummy_chr, dummy_start, dummy_end)
-    base_path <- dirname(dummy_file_path$tmp)
+    base_path <- dirname(dummy_file_path$path)
     if(! dir.exists(base_path)) {
         dir.create(base_path, recursive =  TRUE, showWarnings = FALSE)
     }
 
+    #TODO: move this value to param
+    ncores <- 10
+    my_cluster <- parallel::makeCluster(ncores)
+    parallel::clusterExport(my_cluster,
+                            varlist =c("extract_fasta_alignments_core",
+                                       "fasta_alignment_paths",
+                                       "fasta_alignment_base_paths"),
+                            envir = environment())
+
     #alignment_paths <- apply(feats, MARGIN = 1, FUN = function(feat) {
-    alignment_paths <- unlist(lapply(seq(1, nrow(feats)), function(x) {
+    alignment_paths_lst <- parallel::parLapply(my_cluster,
+                                     seq(1, nrow(feats)),
+                                     function(x) {
+                                         extract_fasta_alignments_core(x,
+                                            feats, alignment_id, clade, chr,
+                                            sequence_names)
+                                     })
 
-        feat <- feats[x, ]
-        start <- as.integer(feat$start)
-        end <- as.integer(feat$end)
-        feat_length <- end - start + 1
+    parallel::stopCluster(my_cluster)
 
-        out_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
-                                               chr, start, end)
-
-        if(! file.exists(out_file_path$tmp)) {
-
-            if(is.na(alignment)) {
-                alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
-            }
-
-            feat_alignment <- rphast::extract.feature.msa(rphast::copy.msa(alignment),
-                                                          feat, do4d = FALSE,
-                                                          pointer.only = FALSE)
-
-            # replace all * by N (DNA_ALPHABET
-            # "A" "C" "G" "T" "M" "R" "W" "S" "Y" "K" "V" "H" "D" "B" "N" "-" "+" ".")
-            # in order to rad fasta format later
-
-            replace_asterix_by_N <- stringr::str_replace_all(feat_alignment$seqs,
-                                                    pattern = "\\*",
-                                                    replacement = "N")
-
-            feat_alignment$seqs <- replace_asterix_by_N
-
-            rphast::write.msa(feat_alignment,
-                              file = out_file_path$tmp,
-                              format = "FASTA",
-                              pretty.print = FALSE)
-
-            rm()
-            gc()
-
-        }
-
-        result <- out_file_path$tmp
-
-        return(result)
-    }))
-
+    alignment_paths <- unlist(alignment_paths_lst)
 
     return(alignment_paths)
 

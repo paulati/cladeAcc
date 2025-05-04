@@ -4,19 +4,44 @@
 
 options(timeout = max(300, getOption("timeout")))
 
+
+prepare_base_dir <- function() {
+
+    custom_user_base_path <- user_local_data_base_path()
+
+    if(is.na(user_base_path)) {
+        #tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
+        result <- pkg_data_tmp_base_path()
+    } else {
+        result <- custom_user_base_path
+    }
+
+    print(result)
+
+    if(! file.exists(result)) {
+        dir.create(result, recursive = TRUE, showWarnings = FALSE)
+    }
+
+    return(result)
+
+}
+
+
+
 # generic function to download data from specified url
 download_data <- function(url,
-                          tmp_storage_relative_path = '',
+                          storage_relative_path = '',
                           force_download = FALSE) {
 
-    #tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
-    tmp_base_dir <- pkg_data_tmp_base_path()
-    dir.create(tmp_base_dir, recursive = TRUE, showWarnings = FALSE)
 
-    if(nchar(tmp_storage_relative_path) == 0) {
-        data_base_dir <- tmp_base_dir
+    base_dir <- prepare_base_dir()
+
+    print(base_dir)
+
+    if(nchar(storage_relative_path) == 0) {
+        data_base_dir <- base_dir
     } else {
-        data_base_dir <- file.path(tmp_base_dir, tmp_storage_relative_path)
+        data_base_dir <- file.path(base_dir, storage_relative_path)
         dir.create(data_base_dir, recursive = TRUE, showWarnings = FALSE)
     }
 
@@ -75,54 +100,24 @@ load_multiz_alignment <- function(alignment_id = NA, chr = NA,
 
     if(is.na(file_path)) {
 
-        # check order: tmp dir, local dir, aws dir
-
         paths <- multiz_alignment_paths(alignment_id, chr)
-        tmp_file_path <- paths$tmp
-        tmp_file_path_gz <- paths$tmp_gz
-        local_file_path <- paths$local
-        local_file_path_gz <- paths$local_gz
-        aws_file_path <- paths$aws_gz
+        data_file_path <- paths$path
+        data_file_path_gz <- paths$path_gz
 
         use_this_path <- ''
 
-        if(file.exists(tmp_file_path)) {
-            use_this_path <- tmp_file_path
-        } else if(file.exists(tmp_file_path_gz)) {
+        if(file.exists(data_file_path)) {
+            use_this_path <- data_file_path
 
+        } else if(file.exists(data_file_path_gz)) {
             # unzip:
-            R.utils::gunzip(filename = tmp_file_path_gz,
-                   destname = tmp_file_path,
-                   remove = FALSE)
+            R.utils::gunzip(filename = data_file_path_gz,
+                            destname = data_file_path,
+                            remove = FALSE)
 
-            use_this_path <- tmp_file_path
-        } else if(file.exists(local_file_path)) {
-            use_this_path <- local_file_path
+            use_this_path <- data_file_path
 
-        } else if(file.exists(local_file_path_gz)) {
-            # TODO
-        } else if(file.exists(aws_file_path)) {
-
-            # TODO
         }
-
-
-        #setwd(local.base.folder.path)
-
-        # if(! file.exists(align_local_file_name)){
-        #     if(file.exists(file_name_gz))
-        #     {
-        #         gunzip(local.file_name_gz, align_local_file_name, remove = FALSE)
-        #
-        #     }
-        #     else
-        #     {
-        #         download.from.s3(account.key, account.secret,
-        #                          remote.base.folder.path, file_name_gz,
-        #                          local.base.folder.path, file_name_gz,
-        #                          align_local_file_name, bucket.name)
-        #     }
-        # }
 
     } else {
 
@@ -141,25 +136,9 @@ load_multiz_alignment <- function(alignment_id = NA, chr = NA,
 # step in "cons" "acc"
 load_neutral_model <- function(alignment_id, step = "cons") {
 
-    # check order: tmp dir, local dir, aws dir
+    fle_path <- neutral_model_paths(alignment_id, step)
 
-    paths <- neutral_model_paths(alignment_id, step)
-    tmp_file_path <- paths$tmp
-    local_file_path <- paths$local
-    aws_file_path <- paths$aws_gz
-
-    use_this_path <- ''
-
-    if(file.exists(tmp_file_path)) {
-        use_this_path <- tmp_file_path
-    } else if(file.exists(local_file_path)) {
-        use_this_path <- local_file_path
-    } else if(file.exists(aws_file_path)) {
-
-        # TODO
-    }
-
-    result <- rphast::read.tm(use_this_path)
+    result <- rphast::read.tm(fle_path)
 
     return(result)
 
@@ -168,20 +147,24 @@ load_neutral_model <- function(alignment_id, step = "cons") {
 
 save_labeled_neutral_model <- function(alignment_id, neutral_model) {
 
-    paths <- neutral_model_paths(alignment_id, step = "acc")
+    path <- neutral_model_paths(alignment_id, step = "acc")
 
-    tmp_path <- paths$tmp
-    tmp_file_name <- basename(tmp_path)
-    tmp_base_path <- dirname(tmp_path)
+    file_name <- basename(path)
+    base_path <- dirname(path)
 
-    neutral_model_labeled_file_name <- stringr::str_replace(tmp_file_name,
+    if(! file.exists(base_path)) {
+        dir.create(base_path, recursive = TRUE, showWarnings = FALSE)
+    }
+
+    neutral_model_labeled_file_name <- stringr::str_replace(file_name,
                                                    pattern = "\\.mod",
                                                    replacement = ".labeled.mod")
-    neutral_model_labeled_file_path <- file.path(tmp_base_path,
+    neutral_model_labeled_file_path <- file.path(base_path,
                                                 neutral_model_labeled_file_name)
 
     labeled_neutral_model_file_path <-
-        rphast::write.tm(neutral_model, neutral_model_labeled_file_path, append = FALSE)
+        rphast::write.tm(neutral_model, neutral_model_labeled_file_path,
+                         append = FALSE)
 
     return(neutral_model_labeled_file_path)
 }
@@ -203,7 +186,9 @@ save_conserved_elements <- function(elements, alignment_id, clade,
         output_base_path <- conserved_elements_path(alignment_id, clade)
     }
 
-    if(!dir.exists(output_base_path)) {
+    print(output_base_path)
+
+    if(!file.exists(output_base_path)) {
         dir.create(output_base_path, recursive = TRUE)
     }
     output_file_path <- file.path(output_base_path, output_file_name)
@@ -222,8 +207,9 @@ save_conserved_elements <- function(elements, alignment_id, clade,
                            end = elements$end)
 
     if(! is.null(elements$attribute)) {
-        names <- stringr::str_replace(elements$attribute, pattern = "id \"([0-9]+)\"",
-                             replacement = "id_\\1")
+        names <- stringr::str_replace(elements$attribute,
+                                      pattern = "id \"([0-9]+)\"",
+                                      replacement = "id_\\1")
         bed_data$names <- names
         elements_data_cols_in_bed <- c(elements_data_cols_in_bed, 'names')
     } else {
@@ -276,7 +262,7 @@ load_conserved_elements <- function(alignment_id = NA, clade = NA, chr = NA,
         if(in_common) {
             file_name <- conserved_mostConserved_in_common_file_name(chr)
         } else {
-            file_name <- conserved_mostConserved_file_name
+            file_name <- conserved_mostConserved_file_name(chr)
         }
 
         file_path <- file.path(base_path, file_name)
@@ -306,9 +292,10 @@ save_obs_phyloP_elements <- function(elements, alignment_id, clade,
                                       feat_length, output_file_name) {
 
     acc_base_path <- accelerated_elements_path(alignment_id, clade)
+
     output_base_path <- file.path(acc_base_path$observed_phyloP, feat_length)
-    if(!dir.exists(output_base_path)) {
-        dir.create(output_base_path, recursive = TRUE)
+    if(!file.exists(output_base_path)) {
+        dir.create(output_base_path, recursive = TRUE, showWarnings = FALSE)
     }
     output_file_path <- file.path(output_base_path, output_file_name)
 
@@ -341,9 +328,10 @@ save_non_parametric_phyloP_elements <- function(elements, alignment_id, clade,
 
     file_name <- accelerated_non_parametric_phyloP_file_name(chr, feat_length)
     acc_base_path <- accelerated_elements_path(alignment_id, clade)
-    output_base_path <- file.path(acc_base_path$non_parametric_phyloP, feat_length)
-    if(!dir.exists(output_base_path)) {
-        dir.create(output_base_path, recursive = TRUE)
+    output_base_path <- file.path(acc_base_path$non_parametric_phyloP,
+                                  feat_length)
+    if(!file.exists(output_base_path)) {
+        dir.create(output_base_path, recursive = TRUE, showWarnings = FALSE)
     }
     file_path <- file.path(output_base_path, file_name)
 
@@ -365,7 +353,7 @@ save_non_parametric_phyloP_distribution <- function(data, alignment_id, clade,
     output_base_path <- file.path(base_path$non_parametric_phyloP_distribution,
                                   feat_length)
 
-    if(!dir.exists(output_base_path)) {
+    if(!file.exists(output_base_path)) {
         dir.create(output_base_path, recursive = TRUE)
     }
     output_file_path <- file.path(output_base_path, output_file_name)
@@ -399,8 +387,7 @@ load_non_parametric_phyloP_distribution <- function(file_path = NA,
 
     if (file.exists(file_path)) {
 
-        data <- read.delim(
-            file_path, sep = '\t', header = TRUE)
+        data <- read.delim(file_path, sep = '\t', header = TRUE)
 
     } else {
 
@@ -430,8 +417,7 @@ load_non_parametric_phyloP_elements <- function(file_path = NA,
 
     if (file.exists(file_path)) {
 
-        data <- read.delim(
-            file_path, sep = '\t', header = TRUE)
+        data <- read.delim(file_path, sep = '\t', header = TRUE)
 
     } else {
 
@@ -449,9 +435,9 @@ save_elements_consensus_info <- function(data, alignment_id,
 
     out_file_path <- fasta_alignment_consensus_sequence_paths(alignment_id,
                                                     clade, feat_length, chr)
+    out_base_path <- dirname(out_file_path)
 
-    out_base_path <- dirname(out_file_path$tmp)
-    if(! dir.exists(out_base_path)) {
+    if(! file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
 
@@ -466,11 +452,10 @@ save_elements_consensus_info <- function(data, alignment_id,
 load_elements_consensus_info <- function(alignment_id, clade, feat_length,
                                          chr) {
 
-
     file_path <- fasta_alignment_consensus_sequence_paths(alignment_id,
                                                     clade, feat_length, chr)
 
-    data <- read.delim(file_path$tmp, sep = '\t', header = TRUE)
+    data <- read.delim(file_path, sep = '\t', header = TRUE)
 
     return(data)
 }
@@ -480,17 +465,18 @@ load_elements_consensus_info <- function(alignment_id, clade, feat_length,
 
 save_acc_raw_scoring <- function(data, alignment_id, clade, feat_length, chr) {
 
-    file_path <- acc_raw_scoring_paths(alignment_id, clade, feat_length, chr)
+    file_path <- acc_raw_scoring_paths(alignment_id, clade, feat_length,
+                                           chr)
 
-    out_base_path <- dirname(file_path$tmp)
-    if(! dir.exists(out_base_path)) {
+    out_base_path <- dirname(file_path)
+    if(! file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
 
-    write.table(data, file = file_path$tmp, sep = '\t', col.names = TRUE,
+    write.table(data, file = file_path, sep = '\t', col.names = TRUE,
                 row.names = FALSE, quote = FALSE)
 
-    return(file_path$tmp)
+    return(file_path)
 
 }
 
@@ -501,35 +487,17 @@ load_acc_raw_scoring <- function(file_path) {
     data <- read.delim(file_path, sep = '\t', header = TRUE)
     return(data)
 
-
-    # if(is.na(file_path)) {
-    #
-    #     paths <- elements_scoring_paths(alignment_id, clade, feat_length, chr)
-    #
-    #     file_path <- paths$tmp
-    # }
-    #
-    # data <- read.delim(file_path, sep = '\t', header = TRUE)
-    #
-    # return(data)
 }
 
 save_acc_filtered_scoring <- function(data, alignment_id,
                                       clade, feat_length, chr) {
 
-    # base_path <- custom_filtering_base_path(alignment_id, clade)
-    # out_base_path <- file.path(base_path, 'acceleration', 'score_filtered',
-    #                            feat_length)
-    # if(!dir.exists(out_base_path)) {
-    #     dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
-    # }
-    # out_file_name <- paste0('chr', chr, '_score_', feat_length,
-    #                         '_filtered_norm.csv')
-    # out_file_path <- file.path(out_base_path, out_file_name)
-
-    acc_filtered_scoring_paths <- acc_filtered_scoring_path(alignment_id,
+    out_file_path <- acc_filtered_scoring_path(alignment_id,
                                                     clade, feat_length, chr)
-    out_file_path <- acc_filtered_scoring_paths$tmp
+    out_base_path <- dirname(out_file_path)
+    if(! file.exists(out_base_path)) {
+        dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
+    }
 
     #     /u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/scoring/25
     # chr22_score_25_filtered_elements_norm.csv
@@ -555,15 +523,11 @@ save_candidate_elements_raw_scoring <- function(data, alignment_id, clade,
     file_path <- candidate_elements_raw_scoring_path(alignment_id, clade,
                                         feat_length, chr)
 
-    # base_path <- custom_filtering_base_path(alignment_id, clade)
-    # out_base_path <- file.path(base_path, 'candidate_elements', 'score_raw',
-    #                            feat_length)
-    # if(!dir.exists(out_base_path)) {
-    #     dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
-    # }
-    #
-    # file_name <- paste0('chr', chr, '_score_', feat_length, '.csv')
-    # file_path <- file.path(out_base_path, file_name)
+    base_path <- dirname(file_path)
+    if(! file.exists(base_path)) {
+        dir.create(base_path, recursive = TRUE, showWarnings = FALSE)
+    }
+
     write.table(data, file = file_path, sep = '\t', col.names = TRUE,
                 row.names = FALSE, quote = FALSE)
 
@@ -583,9 +547,10 @@ save_candidate_elements_filtered_scoring <- function(data, alignment_id, clade,
                                                      feat_length, chr) {
 
     base_path <- custom_filtering_base_path(alignment_id, clade)
+
     out_base_path <- file.path(base_path, 'candidate_elements', 'score_filtered',
                                feat_length)
-    if(!dir.exists(out_base_path)) {
+    if(!file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
 

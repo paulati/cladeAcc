@@ -199,6 +199,7 @@ prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
     # debug:
     # alignment_id <- '100_way'
     # chr <- 17
+    print(alignment_id)
 
 
     #download data
@@ -210,6 +211,8 @@ prepare_alignment_file <- function(alignment_id, chr, md5_data = NA,
     }
 
     download_ok <- check_md5(file_path, md5_data)
+
+    print(download_ok)
 
     if(download_ok) {
 
