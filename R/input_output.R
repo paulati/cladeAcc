@@ -435,17 +435,17 @@ save_elements_consensus_info <- function(data, alignment_id,
 
     out_file_path <- fasta_alignment_consensus_sequence_paths(alignment_id,
                                                     clade, feat_length, chr)
-    out_base_path <- dirname(out_file_path)
+    out_base_path <- dirname(out_file_path$path)
 
     if(! file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
 
-    write.table(data, file = out_file_path$tmp, sep = '\t',
+    write.table(data, file = out_file_path$path, sep = '\t',
                 col.names = TRUE, row.names = FALSE, quote = FALSE)
 
 
-    return(out_file_path$tmp)
+    return(out_file_path$path)
 
 }
 
