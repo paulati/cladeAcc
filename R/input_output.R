@@ -494,7 +494,7 @@ save_acc_filtered_scoring <- function(data, alignment_id,
 
     out_file_path <- acc_filtered_scoring_path(alignment_id,
                                                     clade, feat_length, chr)
-    out_base_path <- dirname(out_file_path)
+    out_base_path <- dirname(out_file_path$path)
     if(! file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
@@ -504,10 +504,10 @@ save_acc_filtered_scoring <- function(data, alignment_id,
     # write.table(data_ingroup_sort, "join_filtered_elements_norm.csv", sep="\t",
     #             quote = FALSE, col.names = TRUE, row.names = FALSE)
 
-    write.table(data, out_file_path, sep="\t",
+    write.table(data, out_file_path$path, sep="\t",
                 quote = FALSE, col.names = TRUE, row.names = FALSE)
 
-    return(out_file_path)
+    return(out_file_path$path)
 
 }
 
