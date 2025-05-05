@@ -80,7 +80,7 @@ filter_acc_scoring <- function(acc_scoring_paths, alignment_id, ingroup_clade,
     result <- lapply(seq(1, length(feat_lengths)), function(x) {
         feat_length <- feat_lengths[x]
         acc_scoring_path <- acc_scoring_paths[[x]]
-        filter_acc_scoring_len(acc_scoring_path, alignment_id,
+        filter_acc_scoring_len(acc_scoring_path$path, alignment_id,
                                ingroup_clade, feat_length, chr)
     })
 
