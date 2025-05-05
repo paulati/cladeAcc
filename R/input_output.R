@@ -455,7 +455,7 @@ load_elements_consensus_info <- function(alignment_id, clade, feat_length,
     file_path <- fasta_alignment_consensus_sequence_paths(alignment_id,
                                                     clade, feat_length, chr)
 
-    data <- read.delim(file_path, sep = '\t', header = TRUE)
+    data <- read.delim(file_path$path, sep = '\t', header = TRUE)
 
     return(data)
 }
@@ -468,12 +468,12 @@ save_acc_raw_scoring <- function(data, alignment_id, clade, feat_length, chr) {
     file_path <- acc_raw_scoring_paths(alignment_id, clade, feat_length,
                                            chr)
 
-    out_base_path <- dirname(file_path)
+    out_base_path <- dirname(file_path$path)
     if(! file.exists(out_base_path)) {
         dir.create(out_base_path, recursive = TRUE, showWarnings = FALSE)
     }
 
-    write.table(data, file = file_path, sep = '\t', col.names = TRUE,
+    write.table(data, file = file_path$path, sep = '\t', col.names = TRUE,
                 row.names = FALSE, quote = FALSE)
 
     return(file_path)
