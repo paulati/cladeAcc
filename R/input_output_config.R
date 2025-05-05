@@ -182,7 +182,7 @@ fasta_alignment_consensus_sequence_relative_path <- function(alignment_id,
 
     result <- list(
         'path' = out,
-        'path_gz' = out_gz,
+        'path_gz' = out_gz
     )
 
     return(result)
