@@ -9,7 +9,7 @@ prepare_base_dir <- function() {
 
     custom_user_base_path <- user_local_data_base_path()
 
-    if(is.na(user_base_path)) {
+    if(is.na(custom_user_base_path)) {
         #tmp_base_dir <- tools::R_user_dir("cladeAcc", which = "data")
         result <- pkg_data_tmp_base_path()
     } else {
