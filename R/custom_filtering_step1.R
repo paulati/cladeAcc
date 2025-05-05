@@ -34,8 +34,9 @@ extract_elements_alignments_fasta <- function(alignment_id, chr, ingroup_clade,
 
 }
 
-extract_fasta_alignments_core <- function(x, feats, alignment_id, clade,
-                                          chr, sequence_names) {
+extract_fasta_alignments_core <- function(x, feats, alignment, alignment_id,
+                                          clade,
+                                          chr) {
 
     feat <- feats[x, ]
     start <- as.integer(feat$start)
@@ -45,41 +46,33 @@ extract_fasta_alignments_core <- function(x, feats, alignment_id, clade,
     out_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
                                         chr, start, end)
 
-    result <- out_file_path
+    if(! file.exists(out_file_path$path)) {
 
-    #if(! file.exists(out_file_path$path)) {
-    #
-    #     if(is.na(alignment)) {
-    #         alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
-    #     }
-    #
-    #     feat_alignment <- rphast::extract.feature.msa(
-    #         rphast::copy.msa(alignment),
-    #         feat, do4d = FALSE,
-    #         pointer.only = FALSE)
-    #
-    #     # replace all * by N (DNA_ALPHABET
-    #     # "A" "C" "G" "T" "M" "R" "W" "S" "Y" "K" "V" "H" "D" "B" "N" "-" "+" ".")
-    #     # in order to read fasta format later
-    #
-    #     replace_asterix_by_N <- stringr::str_replace_all(feat_alignment$seqs,
-    #                                                      pattern = "\\*",
-    #                                                      replacement = "N")
-    #
-    #     feat_alignment$seqs <- replace_asterix_by_N
-    #
-    #     rphast::write.msa(feat_alignment,
-    #                       file = out_file_path$path,
-    #                       format = "FASTA",
-    #                       pretty.print = FALSE)
-    #
-    #     result <- out_file_path$path
-    #
-    #     rm()
-    #     gc()
-    #
-    #}
+        feat_alignment <- rphast::extract.feature.msa(
+            rphast::copy.msa(alignment),
+            feat, do4d = FALSE,
+            pointer.only = FALSE)
 
+        # replace all * by N (DNA_ALPHABET
+        # "A" "C" "G" "T" "M" "R" "W" "S" "Y" "K" "V" "H" "D" "B" "N" "-" "+" ".")
+        # in order to read fasta format later
+
+        replace_asterix_by_N <- stringr::str_replace_all(feat_alignment$seqs,
+                                                         pattern = "\\*",
+                                                         replacement = "N")
+
+        feat_alignment$seqs <- replace_asterix_by_N
+
+        rphast::write.msa(feat_alignment,
+                          file = out_file_path$path,
+                          format = "FASTA",
+                          pretty.print = FALSE)
+
+        rm()
+        gc()
+    }
+
+    result <- out_file_path$path
     return(result)
 
 }
@@ -103,8 +96,8 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
     filtering_clade_config <- filtering_config[[clade]]
     sequence_names <- filtering_clade_config$species
 
-    #alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
-    alignment <- NA #delay load of alignment
+    # alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
+    # alignment <- NA #delay load of alignment
 
     feat_seq_name <- sequence_names[1] # first sequence is reference sequence
 
@@ -126,25 +119,29 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
         dir.create(base_path, recursive =  TRUE, showWarnings = FALSE)
     }
 
+    #if(is.na(alignment)) {
+    alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
+    #}
+
+
     #TODO: move this value to param
-    ncores <- 10
-    my_cluster <- parallel::makeCluster(ncores)
-    parallel::clusterExport(my_cluster,
-                            varlist =c("extract_fasta_alignments_core",
-                                       "fasta_alignment_paths",
-                                       "fasta_alignment_base_paths"),
-                            envir = environment())
+    #ncores <- 4
+    #my_cluster <- parallel::makeCluster(ncores)
+    #parallel::clusterExport(my_cluster,
+    #                        varlist =c("extract_fasta_alignments_core"),
+    #                        envir = environment())
 
     #alignment_paths <- apply(feats, MARGIN = 1, FUN = function(feat) {
-    alignment_paths_lst <- parallel::parLapply(my_cluster,
-                                     seq(1, nrow(feats)),
+    alignment_paths_lst <- #parallel::parLapply(my_cluster,
+                                     #,
+                            lapply(seq(1, nrow(feats)),
                                      function(x) {
                                          extract_fasta_alignments_core(x,
-                                            feats, alignment_id, clade, chr,
-                                            sequence_names)
+                                            feats, alignment, alignment_id,
+                                            clade, chr)
                                      })
 
-    parallel::stopCluster(my_cluster)
+    #parallel::stopCluster(my_cluster)
 
     alignment_paths <- unlist(alignment_paths_lst)
 
