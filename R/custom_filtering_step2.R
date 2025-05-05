@@ -8,7 +8,7 @@ calculate_consensus_sequences <- function(alignment_id, clade,
     out_file_path <- fasta_alignment_consensus_sequence_paths(alignment_id,
                                                     clade, feat_length, chr)
 
-    if(! file.exists(out_file_path$tmp)) {
+    if(! file.exists(out_file_path$path)) {
 
         config <- load_config()
         filtering_config <- config$custom_filtering$filtering[[alignment_id]]
@@ -52,7 +52,7 @@ calculate_elements_consensus_sequences <- function(alignment_id, chr,
 
 
         consensus_in_file_path <- calculate_consensus_sequences(alignment_id,
-                                    ingroup_clade, fasta_base_path_in$tmp,
+                                    ingroup_clade, fasta_base_path_in$path,
                                     chr, feat_length)
 
 
@@ -62,7 +62,7 @@ calculate_elements_consensus_sequences <- function(alignment_id, chr,
 
         consensus_out_file_path <- calculate_consensus_sequences(alignment_id,
                                     outgroup_clade,
-                                    fasta_base_path_out$tmp,
+                                    fasta_base_path_out$path,
                                     chr,
                                     feat_length)
 
