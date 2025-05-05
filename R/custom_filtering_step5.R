@@ -34,7 +34,8 @@ calculate_conserved_elements <- function(alignment_id, clade, chr) {
 
         out_file_path <- save_conserved_elements(data_gr_reduced_length_filter,
                                                  alignment_id, clade,
-                                                 output_file_name, filtered = TRUE,
+                                                 output_file_name,
+                                                 filtered = TRUE,
                                                  format = 'data.frame')
     }
     # out.file.path <- file.path(base_path, "mammals/data/results",

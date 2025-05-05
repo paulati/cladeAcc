@@ -370,7 +370,7 @@ conserved_elements_path <- function(alignment_id, clade) {
 conserved_elements_filtered_path <- function(alignment_id, clade){
 
     base_path <- conserved_elements_path(alignment_id, clade)
-    result <- file.path(base_path$tmp, 'filtered_elements')
+    result <- file.path(base_path, 'filtered_elements')
     return(result)
 }
 
