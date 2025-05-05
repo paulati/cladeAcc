@@ -291,9 +291,11 @@ acc_filtered_scoring_path <- function(alignment_id, clade, feat_length, chr){
         storage_base_path <- local_base_path
     }
 
-    out_base_path <- file.path(storage_base_path, relative_path)
+    out_base_path <- file.path(storage_base_path, relative_path$path)
+    out_base_path_gz <- file.path(storage_base_path, relative_path$path_gz)
+
     out_file_path <- file.path(out_base_path, out_file_name)
-    out_file_path_gz <- file.path(out_base_path, out_file_name_gz)
+    out_file_path_gz <- file.path(out_base_path_gz, out_file_name_gz)
 
 
     result <- list('path' = out_file_path,

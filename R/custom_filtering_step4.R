@@ -14,7 +14,7 @@ filter_acc_scoring_len <- function(acc_scoring_path, alignment_id,
 
     acc_filtered_scoring_paths <- acc_filtered_scoring_path(alignment_id,
                                     clade, feat_length, chr)
-    out_file_path <- acc_filtered_scoring_paths$tmp
+    out_file_path <- acc_filtered_scoring_paths$path
 
     if(! file.exists(out_file_path)) {
 
