@@ -86,6 +86,12 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
     data_acc <- data$data
     mask <- data_acc$non_parametric_FDR < 0.05
 
+    if(sum(mask) == 0) {
+
+        alignment_paths <- c()
+
+    } else {
+
     # sum(mask)
     # nrow(data_acc)
 
@@ -144,6 +150,7 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
     #parallel::stopCluster(my_cluster)
 
     alignment_paths <- unlist(alignment_paths_lst)
+    }
 
     return(alignment_paths)
 
