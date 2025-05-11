@@ -46,9 +46,6 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
         alignment_id, chr, ingroup_clade, outgroup_clade,
         split_lengths = c(25, 50))
 
-
-    print(elements_alignments_paths)
-
     print('processing step 2 / 6')
 
     consensus_sequences_paths <-
@@ -56,16 +53,10 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
                                     outgroup_clade, feat_lengths)
 
 
-
-    print(consensus_sequences_paths)
-
     print('processing step 3 / 6')
 
     acc_scoring_paths <- calculate_acc_scoring(alignment_id, ingroup_clade,
                             outgroup_clade, feat_lengths, chr)
-
-
-    print(acc_scoring_paths)
 
     print('processing step 4 / 6')
 
@@ -73,16 +64,11 @@ process_filtering_chr <- function(alignment_id, chr, ingroup_clade,
                                     alignment_id, ingroup_clade, feat_lengths,
                                     chr)
 
-
-    print(filter_acc_scoring_path)
-
     print('processing step 5 / 6')
 
     cons_clade <- paste0(ingroup_clade, '_', outgroup_clade)
     score_cons_raw_file_paths <- calculate_cons_scoring(alignment_id,
                         cons_clade, feat_lengths, chr, acc_scoring_paths)
-
-    print(score_cons_raw_file_paths)
 
     print('processing step 6 / 6')
 
@@ -128,138 +114,6 @@ process_filtering <- function(alignment_id, clade, chrs) {
 
 }
 
-#-----------------------------------------
-#TODO: analizar todo por cromosoma, al final hacer los joins de todos los archivos,
-# arreglar los id de phastcons, que quede un unico archivo final
-#-----------------------------------------
 
-
-
-# main <- function() {
-#
-#     # preparation_aves()
-#     # preparation_mammals()
-#
-#
-#
-#     # consenso:
-#
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/77_way/output/acceleration/aves/fasta_alignments/25/chr24'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '77_way', clade = 'aves',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 24, feat_length = 25)
-#     #
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/77_way/output/acceleration/sarcopterygii/fasta_alignments/25/chr24'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '77_way', clade = 'sarcopterygii',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 24, feat_length = 25)
-#     #
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/77_way/output/acceleration/aves/fasta_alignments/50/chr24'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '77_way', clade = 'aves',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 24, feat_length = 50)
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/77_way/output/acceleration/sarcopterygii/fasta_alignments/50/chr24'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '77_way', clade = 'sarcopterygii',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 24, feat_length = 50)
-#
-#
-# #---------------------------
-#
-#     # mammals
-#
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/25/chr22'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '100_way', clade = 'mammals',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 22, feat_length = 25)
-#     #
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/25/chr22'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '100_way', clade = 'sarcopterygii',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 22, feat_length = 25)
-#     #
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/mammals/fasta_alignments/50/chr22'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '100_way', clade = 'mammals',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 22, feat_length = 50)
-#     #
-#     # fasta_base_path <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/acceleration/sarcopterygii/fasta_alignments/50/chr22'
-#     #
-#     # calculate_consensus_sequences(alignment_id = '100_way', clade = 'sarcopterygii',
-#     #                               fasta_base_path = fasta_base_path,
-#     #                               chr = 22, feat_length = 50)
-#
-#     # alignment_id <- '100_way'
-#     # ingroup_clade <- 'mammals'
-#     # outgroup_clade <- 'sarcopterygii'
-#     # feat_length <- 25
-#     # chr <- 22
-#     # acc_scoring_path <- calculate_acc_scoring_data(alignment_id, ingroup_clade,
-#     #                     outgroup_clade, feat_length, chr)
-#
-#     # filter_acc_scoring_path <- filter_acc_scoring_data(acc_scoring_path,
-#     #                                 alignment_id, ingroup_clade, feat_length,
-#     #                                 chr)
-#
-#     # # cons scoring data:
-#     # score_cons_raw_file_path <- calculate_cons_scoring_data(
-#     #                             alignment_id = alignment_id,
-#     #                             cons_clade = 'mammals_sarcopterygii',
-#     #                             feat_length = feat_length,
-#     #                             chr = chr,
-#     #                             acc_scoring_path = filter_acc_scoring_path)
-#
-#
-#     # score_cons_file_path <- filter_cons_scoring_data(
-#     #     score_cons_raw_file_path, alignment_id, 'mammals_sarcopterygii', feat_length,
-#     #     chr)
-#
-#     #-----------------------------------------
-#     #TODO: analizar todo por cromosoma, al final hacer los joins de todos los archivos, arreglar los id de phastcons, que quede un unico archivo final
-#     #-----------------------------------------
-#
-#     # feat <- rphast::feat(seqname = 'galGal6', start = 1077205, end = 1077229)
-#     #
-#     # tmp1 <- alignment[[1]]
-#     # for (i in seq(1, length(tmp1))) {
-#     #     tmp_i <- tmp1[i]
-#     #     if(str_detect(tmp_i, pattern = "\\-")) {
-#     #         print(i)
-#     #         # print(tmp_i)
-#     #     }
-#     # }
-#
-#     # 77_way: https://genome.ucsc.edu/cgi-bin/hgTables?db=galGal6&hgta_group=compGeno&hgta_track=cons77way&hgta_table=phastConsElements77way&hgta_doSchema=describe+table+schema
-#     # If the space is insufficient and the gap size is a multiple of 3, a "*" is displayed; other gap sizes are indicated by "+"
-#
-#     # Aviso:
-#     #     In .Call2("fasta_index", filexp_list, nrec, skip, seek.first.rec,  :
-#     #                   reading FASTA file /u01/home/pbeati/.local/share/R/cladeAcc/77_way/output/acceleration/aves/fasta_alignments/25/chr24/acc_25_chr24_1077205_1077229.fasta: ignored 104 invalid one-letter sequence codes
-#
-#
-#
-#     # scoring
-#     # alignment_id <- '100_way'
-#     # ingroup_clade <- 'mammals'
-#     # outgroup_clade <- 'sarcopterygii'
-#     # feat_length <- 25
-#     # chr <- 22
-#     #
-#     # calculate_acc_scoring_data(alignment_id, ingroup_clade, outgroup_clade,
-#     #                                    feat_length, chr)
-#
-# }
 
 
