@@ -114,7 +114,7 @@ compute_accelerated_elements_chr <- function(alignment_id, acc_clade,
         neutral_model_labeled,
         feat_lengths = feat_lengths)
 
-    nrep <- 100 # TODO: cambiar a 100 mil
+    nrep <- 100000
 
     # non_parametric_stats based on chr, ...
     non_parametric_stats_paths  <- calculate_non_parametric_stats(

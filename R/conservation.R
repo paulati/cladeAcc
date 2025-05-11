@@ -56,12 +56,6 @@ conserved_elements_computation <- function(alignment_id, clade, chrs = NA,
 
         out_file_paths <- lapply(chrs, function(chr) {
 
-            # debug:
-            # chr <- 17
-            # alignment_id <- '100_way'
-            # clade <- 'sarcopterygii'
-            # required_feats_func <- required_species_features_sarcopterygii_100way
-
             config <- load_config()
             filtering_config <- config$conservation$filtering[[alignment_id]]
             sequence_names <- filtering_config[[clade]]
@@ -83,11 +77,6 @@ conserved_elements_computation <- function(alignment_id, clade, chrs = NA,
 
     return(out_file_paths)
 }
-
-
-
-# conserved_path_1 <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/conservation/mammals/chr22_mostConserved.bed'
-# conserved_path_2 <- '/u01/home/pbeati/.local/share/R/cladeAcc/100_way/output/conservation/sarcopterygii/chr22_mostConserved.bed'
 
 
 #' Compute intersection between elements sets
@@ -137,10 +126,6 @@ conserved_elements_in_common <- function(alignment_id,
 # 3. compute phastCons mostConserved
 # 4. intersect with req features
 # 5. save bed files
-
-# revisar que las especies que figuran en configuracion son las que estan en el texto del paper
-# ok para 100 way
-
 
 
 

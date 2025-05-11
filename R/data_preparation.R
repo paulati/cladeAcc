@@ -1,30 +1,4 @@
 
-
-# where to save data?
-# https://stackoverflow.com/questions/47101382/where-to-put-r-files-that-generate-package-data
-# https://r-pkgs.org/data.html
-
-#----------------
-
-# https://www.ascend.io/blog/how-to-build-a-data-pipeline-in-six-steps/
-# data pipeline
-# https://www.simplilearn.com/what-is-data-processing-article
-# data processing
-# data preparation  https://www.talend.com/resources/what-is-data-preparation/
-# https://aws.amazon.com/what-is/data-preparation/
-# Collect data. Collecting data is the process of assembling all the data you need for ML. ...
-# Clean data. Cleaning data corrects errors and fills in missing data as a step to ensure data quality. ...
-# Label data. ...
-# Validate and visualize.
-
-# https://rstudio.github.io/config/articles/introduction.html#usage
-
-# https://cran.r-project.org/web/packages/config/vignettes/config.html
-
-# config package
-
-# https://www.appsilon.com/post/r-config
-
 # private functions
 
 # alignment_id <- '100_way'
@@ -83,7 +57,6 @@ get_md5_neutral_model_data <- function(alignment_id, force_download = FALSE) {
     neutral_model_config <- config$conservation$neutral_model[[alignment_id]]
     url <- file.path(neutral_model_config$base_url,
                      neutral_model_config$md5_file_name)
-    # tmp_storage_relative_path <- file.path(alignment_id, 'raw')
     tmp_storage_relative_path <- neutral_model_relative_path(alignment_id)
     file_path <- download_data(url, tmp_storage_relative_path,
                                force_download)
@@ -99,10 +72,6 @@ get_md5_neutral_model_data <- function(alignment_id, force_download = FALSE) {
 
 check_md5 <- function(file_path, md5_data) {
 
-    # debug:
-    # file_path <- "/u01/home/pbeati/.local/share/R/cladeAcc/100_way/chr22.maf.gz"
-    # alignment_id <- '100_way'
-    # md5_data <- get_md5_data(alignment_id)
 
     colnames(md5_data) <- c('md5', 'file_id')
 
@@ -116,7 +85,6 @@ check_md5 <- function(file_path, md5_data) {
 
     return(ok)
 
-    #md5_data$file == file_name
 }
 
 save_file_to_local_storage <- function(tmp_path) {
