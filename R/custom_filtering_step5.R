@@ -191,8 +191,16 @@ calculate_cons_scoring <- function(alignment_id, cons_clade, feat_lengths,
     result <- lapply(seq(1, length(feat_lengths)), function(x) {
         feat_length <- feat_lengths[x]
         acc_scoring_path <- acc_scoring_paths[[x]]
-        calculate_cons_scoring_data(alignment_id, cons_clade, feat_length,
-                                    chr, acc_scoring_path$path)
+        if(nchar(acc_scoring_path$path) == 0) {
+
+            cons_scoring_path <- ''
+
+        } else {
+            cons_scoring_path <- calculate_cons_scoring_data(alignment_id,
+                                        cons_clade, feat_length,
+                                        chr, acc_scoring_path$path)
+        }
+        return(cons_scoring_path)
     })
 
     names(result) <- paste0('len_', feat_lengths)

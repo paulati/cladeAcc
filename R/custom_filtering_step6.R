@@ -98,8 +98,14 @@ filter_cons_scoring <- function(score_cons_raw_file_paths, alignment_id,
     result <- lapply(seq(1, length(feat_lengths)), function(x) {
         feat_length <- feat_lengths[x]
         score_cons_raw_file_path <- score_cons_raw_file_paths[[x]]
-        filter_cons_scoring_len(score_cons_raw_file_path, alignment_id,
-                                            clade, feat_length, chr)    })
+        if(nchar(score_cons_raw_file_path) == 0) {
+            cons_scoring_path <- ''
+        } else {
+            cons_scoring_path <- filter_cons_scoring_len(score_cons_raw_file_path, alignment_id,
+                                            clade, feat_length, chr)
+        }
+        return(cons_scoring_path)
+    })
 
     names(result) <- paste0('len_', feat_lengths)
 

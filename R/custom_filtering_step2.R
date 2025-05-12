@@ -17,19 +17,27 @@ calculate_consensus_sequences <- function(alignment_id, clade,
 
         fasta_files_paths <- list.files(fasta_base_path, full.names = TRUE)
 
-        consensus_sequences <- unlist(lapply(fasta_files_paths,
-            function(fasta_files_path) {
+        if(length(fasta_files_paths) == 0) {
 
-                x <- Biostrings::readDNAStringSet(file = fasta_files_path,
-                                                   format = "fasta")
-                consensus_seq <- Biostrings::consensusString(x,
-                                                          threshold = threshold,
-                                                          ambiguityMap = 'X')
-                return(consensus_seq)
-            }))
+            result <- data.frame('path' = character(0) ,
+                                 'consensus_sequence' = character(0))
 
-        result <- data.frame('path' = fasta_files_paths,
-                             'consensus_sequence' = consensus_sequences)
+        } else {
+
+            consensus_sequences <- unlist(lapply(fasta_files_paths,
+                function(fasta_files_path) {
+
+                    x <- Biostrings::readDNAStringSet(file = fasta_files_path,
+                                                       format = "fasta")
+                    consensus_seq <- Biostrings::consensusString(x,
+                                                              threshold = threshold,
+                                                              ambiguityMap = 'X')
+                    return(consensus_seq)
+                }))
+
+            result <- data.frame('path' = fasta_files_paths,
+                                 'consensus_sequence' = consensus_sequences)
+        }
 
         out_file_path <- save_elements_consensus_info(result, alignment_id,
                                                       clade, feat_length, chr)

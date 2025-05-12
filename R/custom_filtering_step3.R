@@ -6,85 +6,91 @@ calculate_acc_scoring_len <- function(alignment_id, ingroup_clade,
                                                            ingroup_clade,
                                                            feat_length, chr)
 
-    ingroup_consensus_data$id <- basename(ingroup_consensus_data$path)
-
     outgroup_consensus_data <- load_elements_consensus_info(alignment_id,
                                                             outgroup_clade,
                                                             feat_length, chr)
 
-    outgroup_consensus_data$id <- basename(outgroup_consensus_data$path)
+    if(nrow(ingroup_consensus_data) > 0 & nrow(outgroup_consensus_data) > 0) {
 
-    consensus_data <- dplyr::inner_join(ingroup_consensus_data,
-                                        outgroup_consensus_data,
-                                        by = 'id',
-                                        suffix = c("_ingroup", "_outgroup"))
+        ingroup_consensus_data$id <- basename(ingroup_consensus_data$path)
 
-    shift_sequences <- get_shift_seqs(consensus_data$path_ingroup, alignment_id)
+        outgroup_consensus_data$id <- basename(outgroup_consensus_data$path)
 
-    shift_counts <- calculate_shifts_counts(consensus_data, shift_sequences)
+        consensus_data <- dplyr::inner_join(ingroup_consensus_data,
+                                            outgroup_consensus_data,
+                                            by = 'id',
+                                            suffix = c("_ingroup", "_outgroup"))
 
-    gap_counts <- calculate_gaps_counts(
-        consensus_data$consensus_sequence_ingroup)
+        shift_sequences <- get_shift_seqs(consensus_data$path_ingroup, alignment_id)
 
-    hamming_ingroup_incl_gaps <- calculate_hamming_pair_distances(
-        consensus_data$consensus_sequence_ingroup, shift_sequences)
+        shift_counts <- calculate_shifts_counts(consensus_data, shift_sequences)
 
-    hamming_outgroup_incl_gaps <- calculate_hamming_pair_distances(
-        consensus_data$consensus_sequence_outgroup, shift_sequences)
+        gap_counts <- calculate_gaps_counts(
+            consensus_data$consensus_sequence_ingroup)
 
-    # excluding gaps that are simultaneously shifts:
-    data_clean <- clean_shifts_gaps_positions(consensus_data,
-                                              shift_sequences)
-    # hamming based on clean data
-    hamming_ingroup_excl_gaps <- calculate_hamming_pair_distances(
-        data_clean$clean_ingroup_consensus,
-        data_clean$clean_ingroup_shift_sequence)
+        hamming_ingroup_incl_gaps <- calculate_hamming_pair_distances(
+            consensus_data$consensus_sequence_ingroup, shift_sequences)
 
-    hamming_outgroup_excl_gaps <-  calculate_hamming_pair_distances(
-        data_clean$clean_outgroup_consensus,
-        data_clean$clean_outgroup_shift_sequence)
+        hamming_outgroup_incl_gaps <- calculate_hamming_pair_distances(
+            consensus_data$consensus_sequence_outgroup, shift_sequences)
 
-    # length(hamming_ingroup_excl_gaps) == length(hamming_outgroup_excl_gaps)
-    hamming_in_out_incl_gaps <- unlist(lapply(
-        seq(1, length(hamming_ingroup_incl_gaps)), function(x){
-            coord_x <- hamming_ingroup_incl_gaps[x]
-            coord_y <- hamming_outgroup_incl_gaps[x]
-            result <- calculate_distance_to_line_xeqy(coord_x, coord_y)
-            return(result)
-        }))
+        # excluding gaps that are simultaneously shifts:
+        data_clean <- clean_shifts_gaps_positions(consensus_data,
+                                                  shift_sequences)
+        # hamming based on clean data
+        hamming_ingroup_excl_gaps <- calculate_hamming_pair_distances(
+            data_clean$clean_ingroup_consensus,
+            data_clean$clean_ingroup_shift_sequence)
 
-    hamming_in_out_excl_gaps <- unlist(lapply(
-        seq(1, length(hamming_ingroup_excl_gaps)), function(x){
-            coord_x <- hamming_ingroup_excl_gaps[x]
-            coord_y <- hamming_outgroup_excl_gaps[x]
-            result <- calculate_distance_to_line_xeqy(coord_x, coord_y)
-            return(result)
-        }))
+        hamming_outgroup_excl_gaps <-  calculate_hamming_pair_distances(
+            data_clean$clean_outgroup_consensus,
+            data_clean$clean_outgroup_shift_sequence)
 
-    #----
-    # format data and return
+        # length(hamming_ingroup_excl_gaps) == length(hamming_outgroup_excl_gaps)
+        hamming_in_out_incl_gaps <- unlist(lapply(
+            seq(1, length(hamming_ingroup_incl_gaps)), function(x){
+                coord_x <- hamming_ingroup_incl_gaps[x]
+                coord_y <- hamming_outgroup_incl_gaps[x]
+                result <- calculate_distance_to_line_xeqy(coord_x, coord_y)
+                return(result)
+            }))
 
-    acc_elements_info <- parse_element_ids(consensus_data$id)
+        hamming_in_out_excl_gaps <- unlist(lapply(
+            seq(1, length(hamming_ingroup_excl_gaps)), function(x){
+                coord_x <- hamming_ingroup_excl_gaps[x]
+                coord_y <- hamming_outgroup_excl_gaps[x]
+                result <- calculate_distance_to_line_xeqy(coord_x, coord_y)
+                return(result)
+            }))
 
-    result <- data.frame('acc_element_bed_chr' = acc_elements_info$chr,
-                 'acc_element_bed_start' = acc_elements_info$start,
-                 'acc_element_bed_end' = acc_elements_info$end,
-                 'id' = consensus_data$path_ingroup,
-                 'acc_element_len' = acc_elements_info$len,
-                 'acc_element_size' = unlist(lapply(shift_sequences, nchar)),
-                 'acc_element_gap_count' = gap_counts,
-                 'acc_element_shift_count' = shift_counts,
-                 'hamming_ingroup_incl_gaps' = hamming_ingroup_incl_gaps,
-                 'hamming_outgroup_incl_gaps' = hamming_outgroup_incl_gaps,
-                 'hamming_in_out_incl_gaps' = hamming_in_out_incl_gaps,
-                 'hamming_ingroup_excl_gaps' = hamming_ingroup_excl_gaps,
-                 'hamming_outgroup_excl_gaps' = hamming_outgroup_excl_gaps,
-                 'hamming_in_out_excl_gaps' = hamming_in_out_excl_gaps
+        #----
+        # format data and return
 
-    )
+        acc_elements_info <- parse_element_ids(consensus_data$id)
 
-    scoring_path <- save_acc_raw_scoring(result, alignment_id, ingroup_clade,
-                                         feat_length, chr)
+        result <- data.frame('acc_element_bed_chr' = acc_elements_info$chr,
+                     'acc_element_bed_start' = acc_elements_info$start,
+                     'acc_element_bed_end' = acc_elements_info$end,
+                     'id' = consensus_data$path_ingroup,
+                     'acc_element_len' = acc_elements_info$len,
+                     'acc_element_size' = unlist(lapply(shift_sequences, nchar)),
+                     'acc_element_gap_count' = gap_counts,
+                     'acc_element_shift_count' = shift_counts,
+                     'hamming_ingroup_incl_gaps' = hamming_ingroup_incl_gaps,
+                     'hamming_outgroup_incl_gaps' = hamming_outgroup_incl_gaps,
+                     'hamming_in_out_incl_gaps' = hamming_in_out_incl_gaps,
+                     'hamming_ingroup_excl_gaps' = hamming_ingroup_excl_gaps,
+                     'hamming_outgroup_excl_gaps' = hamming_outgroup_excl_gaps,
+                     'hamming_in_out_excl_gaps' = hamming_in_out_excl_gaps
+
+        )
+
+        scoring_path <- save_acc_raw_scoring(result, alignment_id, ingroup_clade,
+                                             feat_length, chr)
+    } else {
+
+        scoring_path <- list('path' = '', 'path_gz' = '')
+    }
 
     return(scoring_path)
 

@@ -25,6 +25,10 @@ extract_elements_alignments_fasta <- function(alignment_id, chr, ingroup_clade,
                                                               alignment_id, chr,
                                                               outgroup_clade)
 
+        alignemnts_paths <- list('ingroup' = ingroup_alignments_paths,
+                       'outgroup' = outgroup_alignemnts_paths)
+
+        return(alignemnts_paths)
     })
 
     names(elements_alignments_paths) <- paste0('len_', split_lengths)
@@ -92,64 +96,64 @@ extract_fasta_alignments <- function(elements_file_path, alignment_id, chr,
 
     } else {
 
-    # sum(mask)
-    # nrow(data_acc)
+        # sum(mask)
+        # nrow(data_acc)
 
-    data_acc_significative <- data_acc[mask, ]
+        data_acc_significative <- data_acc[mask, ]
 
-    config <- load_config()
-    filtering_config <- config$custom_filtering$filtering[[alignment_id]]
-    filtering_clade_config <- filtering_config[[clade]]
-    sequence_names <- filtering_clade_config$species
+        config <- load_config()
+        filtering_config <- config$custom_filtering$filtering[[alignment_id]]
+        filtering_clade_config <- filtering_config[[clade]]
+        sequence_names <- filtering_clade_config$species
 
-    # alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
-    # alignment <- NA #delay load of alignment
+        # alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
+        # alignment <- NA #delay load of alignment
 
-    feat_seq_name <- sequence_names[1] # first sequence is reference sequence
+        feat_seq_name <- sequence_names[1] # first sequence is reference sequence
 
-    feats <- rphast::feat(seqname = feat_seq_name, # sin esto no funciona extract.feature.msa
-                          start = data_acc_significative$start,
-                          end = data_acc_significative$end,
-                          feature = data_acc_significative$feature,
-                          score =  data_acc_significative$score)
+        feats <- rphast::feat(seqname = feat_seq_name, # sin esto no funciona extract.feature.msa
+                              start = data_acc_significative$start,
+                              end = data_acc_significative$end,
+                              feature = data_acc_significative$feature,
+                              score =  data_acc_significative$score)
 
-    # checking existence of output directory:
-    dummy_start <- feats[1, 'start']
-    dummy_end <- feats[1, 'end']
-    dummy_chr <- chr
-    feat_length <- dummy_end - dummy_start + 1
-    dummy_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
-                                             dummy_chr, dummy_start, dummy_end)
-    base_path <- dirname(dummy_file_path$path)
-    if(! dir.exists(base_path)) {
-        dir.create(base_path, recursive =  TRUE, showWarnings = FALSE)
-    }
+        # checking existence of output directory:
+        dummy_start <- feats[1, 'start']
+        dummy_end <- feats[1, 'end']
+        dummy_chr <- chr
+        feat_length <- dummy_end - dummy_start + 1
+        dummy_file_path <- fasta_alignment_paths(alignment_id, clade, feat_length,
+                                                 dummy_chr, dummy_start, dummy_end)
+        base_path <- dirname(dummy_file_path$path)
+        if(! dir.exists(base_path)) {
+            dir.create(base_path, recursive =  TRUE, showWarnings = FALSE)
+        }
 
-    #if(is.na(alignment)) {
-    alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
-    #}
+        #if(is.na(alignment)) {
+        alignment <- load_multiz_alignment(alignment_id, chr, sequence_names)
+        #}
 
 
-    #TODO: move this value to param
-    #ncores <- 4
-    #my_cluster <- parallel::makeCluster(ncores)
-    #parallel::clusterExport(my_cluster,
-    #                        varlist =c("extract_fasta_alignments_core"),
-    #                        envir = environment())
+        #TODO: move this value to param
+        #ncores <- 4
+        #my_cluster <- parallel::makeCluster(ncores)
+        #parallel::clusterExport(my_cluster,
+        #                        varlist =c("extract_fasta_alignments_core"),
+        #                        envir = environment())
 
-    #alignment_paths <- apply(feats, MARGIN = 1, FUN = function(feat) {
-    alignment_paths_lst <- #parallel::parLapply(my_cluster,
-                                     #,
-                            lapply(seq(1, nrow(feats)),
-                                     function(x) {
-                                         extract_fasta_alignments_core(x,
-                                            feats, alignment, alignment_id,
-                                            clade, chr)
-                                     })
+        #alignment_paths <- apply(feats, MARGIN = 1, FUN = function(feat) {
+        alignment_paths_lst <- #parallel::parLapply(my_cluster,
+                                         #,
+                                lapply(seq(1, nrow(feats)),
+                                         function(x) {
+                                             extract_fasta_alignments_core(x,
+                                                feats, alignment, alignment_id,
+                                                clade, chr)
+                                         })
 
-    #parallel::stopCluster(my_cluster)
+        #parallel::stopCluster(my_cluster)
 
-    alignment_paths <- unlist(alignment_paths_lst)
+        alignment_paths <- unlist(alignment_paths_lst)
     }
 
     return(alignment_paths)
