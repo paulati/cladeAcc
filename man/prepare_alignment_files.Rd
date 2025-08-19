@@ -8,7 +8,7 @@ prepare_alignment_files(
   alignment_id,
   chrs,
   local_storage = FALSE,
-  aws_storage = TRUE
+  aws_storage = FALSE
 )
 }
 \arguments{
@@ -20,7 +20,7 @@ prepare_alignment_files(
 (default value FALSE)}
 
 \item{aws_storage}{boolean Save alignments to aws storage
-(default value TRUE)}
+(default value FALSE)}
 }
 \description{
 Prepare alignment files for specified chromosomes
